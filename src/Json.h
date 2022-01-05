@@ -36,7 +36,7 @@ class JSType {
         ~Element();
         Type getType() const;
         String getValue() const;
-        bool operator==(const Element &e);
+        bool operator==(const Element &e) const;
     };
 
     struct Value {
@@ -79,8 +79,8 @@ class JsonArray {
     JsonArray(std::vector<int> &arr);
 
     JsonArray &push(const String &value, const JSType::Type &type);
-    JsonArray &push(Json &value);
-    JsonArray &push(JsonArray &value);
+    JsonArray &push(const Json &value);
+    JsonArray &push(const JsonArray &value);
     JsonArray &push(const char *value);
     JsonArray &push(const String &value);
     JsonArray &push(const int8_t &value);
@@ -94,17 +94,18 @@ class JsonArray {
     JsonArray &push(const float &value, const uint8_t &precision = 2);
     JsonArray &push(const double &value, const uint8_t &precision = 2);
 
-    JSType::Value getValue(const uint16_t &index);
-    JSType::Value operator[](const uint16_t &index);
+    JSType::Value getValue(const uint16_t &index) const;
+    JSType::Value operator[](const uint16_t &index) const;
 
-    JSType::Element getElement(const uint16_t &index);
-    JSType::Type getType(const uint16_t &index);
-    String getTypeString(const uint16_t &index);
-    String toString();
+    JSType::Element getElement(const uint16_t &index) const;
+    JSType::Type getType(const uint16_t &index) const;
+    String getTypeString(const uint16_t &index) const;
+    String toString() const;
 
-    size_t size();
-    bool contains(const JSType::Element &e);
+    size_t size() const;
+    bool contains(const JSType::Element &e) const;
     void erase(const uint16_t &index);
+    void clear();
     std::vector<JSType::Element>::iterator begin();
     std::vector<JSType::Element>::iterator end();
 
@@ -119,8 +120,8 @@ class Json {
     Json(const String &str);
 
     Json &add(const String &name, const String &value, const JSType::Type &type);
-    Json &add(const String &name, Json &value);
-    Json &add(const String &name, JsonArray &value);
+    Json &add(const String &name, const Json &value);
+    Json &add(const String &name, const JsonArray &value);
     Json &add(const String &name, const char *value);
     Json &add(const String &name, const String &value);
     Json &add(const String &name, const int8_t &value);
@@ -134,26 +135,27 @@ class Json {
     Json &add(const String &name, const float &value, const uint8_t &precision = 2);
     Json &add(const String &name, const double &value, const uint8_t &precision = 2);
 
-    JSType::Value getValue(const String &name);
-    JSType::Value getValue(const uint16_t &index);
-    JSType::Value operator[](const String &name);
-    JSType::Value operator[](const uint16_t &index);
+    JSType::Value getValue(const String &name) const;
+    JSType::Value getValue(const uint16_t &index) const;
+    JSType::Value operator[](const String &name) const;
+    JSType::Value operator[](const uint16_t &index) const;
 
-    JSType::Element getElement(const String &name);
-    JSType::Element getElement(const uint16_t &index);
+    JSType::Element getElement(const String &name) const;
+    JSType::Element getElement(const uint16_t &index) const;
 
-    JSType::Type getType(const String &name);
-    JSType::Type getType(const uint16_t &index);
-    String getTypeString(const String &name);
-    String getTypeString(const uint16_t &index);
-    String getKey(const uint16_t &index);
+    JSType::Type getType(const String &name) const;
+    JSType::Type getType(const uint16_t &index) const;
+    String getTypeString(const String &name) const;
+    String getTypeString(const uint16_t &index) const;
+    String getKey(const uint16_t &index) const;
     
-    int16_t getIndex(const String &name);
-    String toString();
+    int16_t getIndex(const String &name) const;
+    String toString() const;
 
     size_t size() const;
     bool contains(String name) const;
     void erase(const String &name);
+    void clear();
     std::map<String, JSType::Element>::iterator begin();
     std::map<String, JSType::Element>::iterator end();
 

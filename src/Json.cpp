@@ -22,7 +22,7 @@ String JSType::Element::getValue() const {
     return *value;
 }
 
-bool JSType::Element::operator==(const Element &e) {
+bool JSType::Element::operator==(const Element &e) const {
     return value->equals(e.getValue()) && (type == e.getType());
 }
 
@@ -456,12 +456,12 @@ JsonArray &JsonArray::push(const String &value, const JSType::Type &type) {
     return *this;
 }
 
-JsonArray &JsonArray::push(Json &value) {
+JsonArray &JsonArray::push(const Json &value) {
     push(value.toString(), JSType::jsonObject);
     return *this;
 }
 
-JsonArray &JsonArray::push(JsonArray &value) {
+JsonArray &JsonArray::push(const JsonArray &value) {
     push(value.toString(), JSType::jsonArray);
     return *this;
 }
@@ -526,42 +526,42 @@ JsonArray &JsonArray::push(const double &value, const uint8_t &precision) {
     return *this;
 }
 
-JSType::Value JsonArray::getValue(const uint16_t &index) {
+JSType::Value JsonArray::getValue(const uint16_t &index) const {
     if (index < v.size()) {
         return {v[index].getValue()};
     }
     return {String()};
 }
 
-JSType::Value JsonArray::operator[](const uint16_t &index) {
+JSType::Value JsonArray::operator[](const uint16_t &index) const {
     if (index < v.size()) {
         return {v[index].getValue()};
     }
     return {String()};
 }
 
-JSType::Element JsonArray::getElement(const uint16_t &index) {
+JSType::Element JsonArray::getElement(const uint16_t &index) const {
     if (index < v.size()) {
         return v[index];
     }
     return JSType::Element();
 }
 
-JSType::Type JsonArray::getType(const uint16_t &index) {
+JSType::Type JsonArray::getType(const uint16_t &index) const {
     if (index < v.size()) {
         return v[index].getType();
     }
     return JSType::undefined;
 }
 
-String JsonArray::getTypeString(const uint16_t &index) {
+String JsonArray::getTypeString(const uint16_t &index) const {
     if (index < v.size()) {
         return JSUtil.typeToString(v[index].getType());
     }
     return JSUtil.typeToString(JSType::undefined);
 }
 
-String JsonArray::toString() {
+String JsonArray::toString() const {
     String str("[");
     bool isFirst = true;
     for (int i = 0; i < v.size(); i++) {
@@ -576,7 +576,7 @@ String JsonArray::toString() {
     return str;
 }
 
-size_t JsonArray::size() {
+size_t JsonArray::size() const {
     return v.size();
 }
 
@@ -586,7 +586,11 @@ void JsonArray::erase(const uint16_t &index) {
     }
 }
 
-bool JsonArray::contains(const JSType::Element &e) {
+void JsonArray::clear() {
+    v.clear();
+}
+
+bool JsonArray::contains(const JSType::Element &e) const {
     for (int i = 0; i < v.size(); i++) {
         if (v[i] == e) {
             return true;
@@ -623,12 +627,12 @@ Json &Json::add(const String &name, const String &value, const JSType::Type &typ
     return *this;
 }
 
-Json &Json::add(const String &name, Json &value) {
+Json &Json::add(const String &name, const Json &value) {
     add(name, value.toString(), JSType::jsonObject);
     return *this;
 }
 
-Json &Json::add(const String &name, JsonArray &value) {
+Json &Json::add(const String &name, const JsonArray &value) {
     add(name, value.toString(), JSType::jsonArray);
     return *this;
 }
@@ -693,95 +697,95 @@ Json &Json::add(const String &name, const void *value) {
     return *this;
 }
 
-JSType::Value Json::getValue(const String &name) {
+JSType::Value Json::getValue(const String &name) const {
     if (contains(name)) {
-        return {doc[name].getValue()};
+        return {doc.at(name).getValue()};
     }
     return {String()};
 }
 
-JSType::Value Json::getValue(const uint16_t &index) {
+JSType::Value Json::getValue(const uint16_t &index) const {
     if (indexList.count(index) > 0) {
         return {getElement(index).getValue()};
     }
     return {String()};
 }
 
-JSType::Value Json::operator[](const String &name) {
+JSType::Value Json::operator[](const String &name) const {
     if (contains(name)) {
-        return {doc[name].getValue()};
+        return {doc.at(name).getValue()};
     }
     return {String()};
 }
 
-JSType::Value Json::operator[](const uint16_t &index) {
+JSType::Value Json::operator[](const uint16_t &index) const {
     if (indexList.count(index) > 0) {
         return {getElement(index).getValue()};
     }
     return {String()};
 }
 
-JSType::Element Json::getElement(const String &name) {
+JSType::Element Json::getElement(const String &name) const {
     if (contains(name)) {
-        return doc[name];
+        return doc.at(name);
     } else {
         return JSType::Element();
     }
 }
 
-JSType::Element Json::getElement(const uint16_t &index) {
+JSType::Element Json::getElement(const uint16_t &index) const {
     if (indexList.count(index) > 0) {
-        return doc[indexList[index]];
+        return doc.at(indexList.at(index));
     } else {
         return JSType::Element();
     }
 }
 
-JSType::Type Json::getType(const String &name) {
+JSType::Type Json::getType(const String &name) const {
     if (contains(name)) {
-        return doc[name].getType();
+        return doc.at(name).getType();
     }
     return JSType::undefined;
 }
 
-JSType::Type Json::getType(const uint16_t &index) {
+JSType::Type Json::getType(const uint16_t &index) const {
     if (indexList.count(index) > 0) {
-        return doc[indexList[index]].getType();
+        return doc.at(indexList.at(index)).getType();
     }
     return JSType::undefined;
 }
 
-String Json::getTypeString(const String &name) {
+String Json::getTypeString(const String &name) const {
     if (contains(name)) {
-        return JSUtil.typeToString(doc[name].getType());
+        return JSUtil.typeToString(doc.at(name).getType());
     }
     return JSUtil.typeToString(JSType::undefined);
 }
 
-String Json::getTypeString(const uint16_t &index) {
+String Json::getTypeString(const uint16_t &index) const {
     if (indexList.count(index) > 0) {
-        return JSUtil.typeToString(doc[indexList[index]].getType());
+        return JSUtil.typeToString(doc.at(indexList.at(index)).getType());
     }
     return JSUtil.typeToString(JSType::undefined);
 }
 
-String Json::getKey(const uint16_t &index) {
+String Json::getKey(const uint16_t &index) const {
     if (indexList.count(index) > 0) {
-        return indexList[index];
+        return indexList.at(index);
     }
     return String();
 }
 
-int16_t Json::getIndex(const String &name) {
+int16_t Json::getIndex(const String &name) const {
     for (int i = 0; i < indexList.size(); i++) {
-        if (indexList[i].equals(name)) {
+        if (indexList.at(i).equals(name)) {
             return i;
         }
     }
     return -1;
 }
 
-String Json::toString() {
+String Json::toString() const {
     String str("{");
     bool isFirst = true;
     for (int i = 0; i < doc.size(); i++) {
@@ -814,6 +818,12 @@ void Json::erase(const String &name) {
             arrangeIndex(i);
         }
     }
+}
+
+void Json::clear() {
+    doc.clear();
+    indexList.clear();
+    counter = 0;
 }
 
 std::map<String, JSType::Element>::iterator Json::begin() {
