@@ -10,7 +10,7 @@ Just create `Json` object and the String into it's constructor.
 Json      json("{\"name\":\"John\", \"age\":30, \"car\":null}");
 JsonArray jsonArray("[3.14, false, \"Hello World\"]");
 ```
-### Adding Element to Json Object
+### Adding Elements to a Json Object
 Create empty `Json` object and fill it by calling `add`.
 ```c++
 Json json;
@@ -30,7 +30,7 @@ json.add("object"  , Json()
                         .add("bool", false));
 ```
 
-### Retrieving Element from Json Object
+### Retrieving Elements from a Json Object
 To get the value, you can cast it or just assign it to an existing variable.
 ```c++
 String    value   = json["key"];
@@ -39,6 +39,16 @@ float     pi      = json["float"];
 bool      isAlive = json["boolean"];
 Json      obj     = json["object"];
 JsonArray arr     = json["array"];  
+```
+
+### Modifying Elements of a Json Object
+```c++
+json["key"]      = "new value";
+json["integer"]  = 5;
+json["float"]    = 6.28;
+json["boolean"]  = false;
+json["object"]   = Json().add("key", "value");
+json["array"]    = JsonArray().push("value");
 ```
 
 ### Miscellaneous
