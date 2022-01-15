@@ -74,7 +74,7 @@ json["array"].as<JsonArray&>()[0] = "new value"
 ```
 
 ### Miscellaneous
-All functions are available here.
+Other methods are described here.
 ```c++
 //Stringify a Json object
 String payload = json.toString();
