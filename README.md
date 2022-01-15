@@ -1,4 +1,4 @@
-## Json Library for Arduino, ESP8266, and ESP32
+## Json Library for ESP8266 and ESP32
 A Simple and easy to use Json library to _parse_ and _stringify_ a `Json` object. No need to allocate buffer, no need additional setup, just create your `Json` object and you are done!
 
 ## Example
