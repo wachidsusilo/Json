@@ -1,120 +1,206 @@
 #include "Json.h"
 
-static String _emptyValue = "";
-static JSType::Element _emptyElement = JSType::Element(_emptyValue, JSType::undefined);
+static JSType::Element _emptyElement;
 
 /**--- Json Type ---**/
 JSType::Element::Element()
-    : value(&_emptyValue), type(undefined) {}
+    : value(new String("null")), type(jsonNull), object(NULL), array(NULL) {}
 
 JSType::Element::~Element() {
-    if (value && value != &_emptyValue) delete value;
+    release();
 }
 
 JSType::Element::Element(const String &value, const Type &type)
-    : value(new String(value)), type(type) {}
+    : value(new String(value)), type(type), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const Element &e)
-    : value(new String(e.getValue())), type(e.getType()) {}
+    : value(NULL), type(e.type), object(NULL), array(NULL) {
+    type = e.type;
+    switch (type) {
+        case jsonObject:
+            if (e.object)
+                object = new Json(e.object->toString());
+            else if (e.value)
+                object = new Json(*e.value);
+            else
+                object = new Json();
+            break;
+        case jsonArray:
+            if (e.array)
+                array = new JsonArray(e.array->toString());
+            else if (e.value)
+                array = new JsonArray(*e.value);
+            else
+                array = new JsonArray();
+            break;
+        default:
+            value = new String(*e.value);
+            break;
+    }
+}
 
 JSType::Element::Element(const int8_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const int16_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const int32_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const uint8_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const uint16_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const uint32_t &value)
-    : value(new String(value)), type(jsonInteger) {}
+    : value(new String(value)), type(jsonInteger), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const float &value)
-    : value(new String(JSUtil.toString(value))), type(jsonFloat) {}
+    : value(new String(JSUtil.toString(value))), type(jsonFloat), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const double &value)
-    : value(new String(JSUtil.toString(value))), type(jsonFloat) {}
+    : value(new String(JSUtil.toString(value))), type(jsonFloat), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const String &value)
-    : value(new String(value)), type(jsonString) {}
+    : value(new String(value)), type(jsonString), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const char *value)
-    : value(new String(value)), type(jsonString) {}
-
-JSType::Element::Element(const void *value)
-    : value(new String("null")), type(jsonNull) {}
+    : value(new String(value)), type(jsonString), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const bool &value)
-    : value(new String(value ? "true" : "false")), type(jsonBoolean) {}
+    : value(new String(value ? "true" : "false")), type(jsonBoolean), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const Json &value)
-    : value(new String(value.toString())), type(jsonObject) {}
+    : value(NULL), type(jsonObject), object(new Json(value.toString())), array(NULL) {}
 
 JSType::Element::Element(const JsonArray &value)
-    : value(new String(value.toString())), type(jsonArray) {}
+    : value(NULL), type(jsonArray), object(NULL), array(new JsonArray(value.toString())) {}
 
-JSType::Element::operator int8_t() {
+JSType::Element::operator int8_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator int16_t() {
+JSType::Element::operator int16_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator int32_t() {
+JSType::Element::operator int32_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator uint8_t() {
+JSType::Element::operator uint8_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator uint16_t() {
+JSType::Element::operator uint16_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator uint32_t() {
+JSType::Element::operator uint32_t() const {
+    if (!value) return 0;
     return round((*value).toDouble());
 }
 
-JSType::Element::operator float() {
+JSType::Element::operator float() const {
+    if (!value) return 0;
     return (*value).toFloat();
 }
 
-JSType::Element::operator double() {
+JSType::Element::operator double() const {
+    if (!value) return 0;
     return (*value).toDouble();
 }
 
-JSType::Element::operator String() {
-    return *value;
-}
-
-JSType::Element::operator bool() {
+JSType::Element::operator bool() const {
+    if (!value) return false;
     return (*value).equals("true");
 }
 
-JSType::Element::operator void *() {
+JSType::Element::operator void *() const {
     return NULL;
 }
 
-JSType::Element::operator Json() {
-    return Json((*value).c_str());
+JSType::Element::operator String() const {
+    switch (type) {
+        case jsonObject: {
+            if (object)
+                return object->toString();
+            else if (value)
+                return *value;
+            else
+                return "";
+        }
+        case jsonArray: {
+            if (array)
+                return array->toString();
+            else if (value)
+                return *value;
+            else
+                return "";
+        }
+        default:
+            return *value;
+    }
 }
 
-JSType::Element::operator JsonArray() {
-    return JsonArray((*value).c_str());
+JSType::Element::operator Json &() {
+    if (!object) {
+        if (value && type == jsonObject) {
+            object = new Json(*value);
+            delete value;
+            value = NULL;
+        } else {
+            object = new Json();
+        }
+    }
+    return *object;
+}
+
+JSType::Element::operator JsonArray &() {
+    if (!array) {
+        if (value && type == jsonArray) {
+            array = new JsonArray(*value);
+            delete value;
+            value = NULL;
+        } else {
+            array = new JsonArray();
+        }
+    }
+    return *array;
 }
 
 JSType::Element &JSType::Element::operator=(const Element &e) {
-    if(this == &e) return *this;
-    *value = e.getValue();
+    if (this == &e) return *this;
+    release();
     type = e.getType();
+    switch (type) {
+        case jsonObject:
+            if (e.object)
+                object = new Json(e.object->toString());
+            else if (e.value)
+                object = new Json(*e.value);
+            else
+                object = new Json();
+            break;
+        case jsonArray:
+            if (e.array)
+                array = new JsonArray(e.array->toString());
+            else if (e.value)
+                array = new JsonArray(*e.value);
+            else
+                array = new JsonArray();
+            break;
+        default:
+            value = new String(*e.value);
+            break;
+    }
     return *this;
 }
 
@@ -122,16 +208,29 @@ JSType::Type JSType::Element::getType() const {
     return type;
 }
 
-String &JSType::Element::getValue() {
-    return *value;
-}
-
-const String &JSType::Element::getValue() const {
-    return *value;
+String JSType::Element::toString() {
+    return *this;
 }
 
 bool JSType::Element::operator==(const Element &e) const {
-    return value->equals(e.getValue()) && (type == e.getType());
+    if (type != e.getType()) return false;
+    switch (type) {
+        case jsonObject:
+            return object->toString().equals(e.object->toString());
+        case jsonArray:
+            return array->toString().equals(e.array->toString());
+        default:
+            return value->equals(*e.value);
+    }
+}
+
+void JSType::Element::release() {
+    if (value) delete value;
+    if (object) delete object;
+    if (array) delete array;
+    value = NULL;
+    object = NULL;
+    array = NULL;
 }
 
 /**--- Json Utility ---**/
@@ -394,6 +493,7 @@ void JsonUtil::prettyPrint(HardwareSerial &serial, JsonArray &v, const uint8_t &
 }
 
 void JsonUtil::prettyPrint(HardwareSerial &serial, Json *doc, JsonArray *v, const uint8_t &spaceTab, const uint8_t &space) {
+    if (!doc && !v) return;
     String sTab = "";
     for (int i = 0; i < spaceTab; i++) {
         sTab += " ";
@@ -420,45 +520,47 @@ void JsonUtil::prettyPrint(HardwareSerial &serial, Json *doc, JsonArray *v, cons
         }
         serial.print(indent + (doc ? "\"" + doc->getKey(i) + "\":" : ""));
         switch ((doc ? doc->getType(i) : v->getType(i))) {
-            case JSType::jsonObject:
+            case JSType::jsonObject: {
+                Json *json = NULL;
                 if (doc) {
-                    Json *json = new Json(doc->getElement(i).getValue());
-                    prettyPrint(serial, json, NULL, spaceTab, space + 1);
-                    if (json) delete json;
+                    json = new Json(doc->getElement(i).as<String>());
                 } else {
-                    Json *json = new Json(v->getElement(i).getValue());
-                    prettyPrint(serial, json, NULL, spaceTab, space + 1);
-                    if (json) delete json;
+                    json = new Json(v->getElement(i).as<String>());
+                }
+                prettyPrint(serial, json, NULL, spaceTab, space + 1);
+                if (json) delete json;
+                break;
+            }
+            case JSType::jsonArray: {
+                JsonArray *array = NULL;
+                if (doc) {
+                    array = new JsonArray(doc->getElement(i).as<String>());
+                } else {
+                    array = new JsonArray(v->getElement(i).as<String>());
+                }
+                prettyPrint(serial, NULL, array, spaceTab, space + 1);
+                if (array) delete array;
+                break;
+            }
+            case JSType::jsonString: {
+                if (doc) {
+                    serial.print("\"" + doc->getElement(i).as<String>() + "\"");
+                } else {
+                    serial.print("\"" + v->getElement(i).as<String>() + "\"");
                 }
                 break;
-            case JSType::jsonArray:
-                if (doc) {
-                    JsonArray *arr = new JsonArray(doc->getElement(i).getValue());
-                    prettyPrint(serial, NULL, arr, spaceTab, space + 1);
-                    if (arr) delete arr;
-                } else {
-                    JsonArray *arr = new JsonArray(v->getElement(i).getValue());
-                    prettyPrint(serial, NULL, arr, spaceTab, space + 1);
-                    if (arr) delete arr;
-                }
-                break;
-            case JSType::jsonString:
-                if (doc) {
-                    serial.print("\"" + doc->getElement(i).getValue() + "\"");
-                } else {
-                    serial.print("\"" + v->getElement(i).getValue() + "\"");
-                }
-                break;
+            }
             case JSType::jsonInteger:
             case JSType::jsonBoolean:
             case JSType::jsonFloat:
-            case JSType::jsonNull:
+            case JSType::jsonNull: {
                 if (doc) {
-                    serial.print(doc->getElement(i).getValue());
+                    serial.print(doc->getElement(i).as<String>());
                 } else {
-                    serial.print(v->getElement(i).getValue());
+                    serial.print(v->getElement(i).as<String>());
                 }
                 break;
+            }
         }
     }
     serial.print("\n" + inBot + (doc ? "}" : "]") + String(space == 0 ? "\n" : ""));
@@ -523,60 +625,53 @@ JsonArray::JsonArray(const String &str) : v(std::vector<JSType::Element>()) {
     JSUtil.parse(str.c_str(), NULL, this);
 }
 
+JsonArray::JsonArray(const JsonArray &other) : v(other.v) {}
+
 JsonArray::JsonArray(std::vector<int> &arr) : v(std::vector<JSType::Element>()) {
     for (int i : arr) push(i);
 }
 
 JsonArray &JsonArray::push(const String &value, const JSType::Type &type) {
+#ifdef ESP32
     v.emplace_back(value, type);
+#else
+    v.push_back(JSType::Element(value, type));
+#endif
     return *this;
 }
 
 JsonArray &JsonArray::push(const JSType::Element &value) {
-    push(value.getValue(), value.getType());
+    push(value.as<String>(), value.getType());
+    return *this;
+}
+
+JsonArray &JsonArray::push() {
+    push("null", JSType::jsonNull);
     return *this;
 }
 
 JSType::Element &JsonArray::operator[](const uint16_t &index) {
-    if (index < v.size()) {
-        return v.at(index);
-    }
-    return _emptyElement;
+    return v.at(index);
 }
 
 JSType::Element &JsonArray::getElement(const uint16_t &index) {
-    if (index < v.size()) {
-        return v[index];
-    }
-    return _emptyElement;
+    return v[index];
 }
 
 const JSType::Element &JsonArray::operator[](const uint16_t &index) const {
-    if (index < v.size()) {
-        return v.at(index);
-    }
-    return _emptyElement;
+    return v.at(index);
 }
 
 const JSType::Element &JsonArray::getElement(const uint16_t &index) const {
-    if (index < v.size()) {
-        return v[index];
-    }
-    return _emptyElement;
+    return v[index];
 }
 
 JSType::Type JsonArray::getType(const uint16_t &index) const {
-    if (index < v.size()) {
-        return v[index].getType();
-    }
-    return JSType::undefined;
+    return v[index].getType();
 }
 
 String JsonArray::getTypeString(const uint16_t &index) const {
-    if (index < v.size()) {
-        return JSUtil.typeToString(v[index].getType());
-    }
-    return JSUtil.typeToString(JSType::undefined);
+    return JSUtil.typeToString(v[index].getType());
 }
 
 String JsonArray::toString() const {
@@ -588,7 +683,7 @@ String JsonArray::toString() const {
         } else {
             str += ",";
         }
-        str += (v[i].getType() == JSType::jsonString ? "\"" : "") + v[i].getValue() + (v[i].getType() == JSType::jsonString ? "\"" : "");
+        str += (v[i].getType() == JSType::jsonString ? "\"" : "") + v[i].as<String>() + (v[i].getType() == JSType::jsonString ? "\"" : "");
     }
     str += "]";
     return str;
@@ -639,106 +734,86 @@ Json::Json(const String &str)
     JSUtil.parse(str.c_str(), this, NULL);
 }
 
+Json::Json(const Json &other)
+    : doc(other.doc), indexList(other.indexList), counter(other.counter) {}
+
 Json &Json::add(const String &name, const String &value, const JSType::Type &type) {
+#ifdef ESP32
     doc.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(value, type));
     indexList.emplace(counter++, name);
+#else
+    doc.insert(std::make_pair(name, JSType::Element(value, type)));
+    indexList.insert(std::make_pair(counter++, name));
+#endif
     return *this;
 }
 
 Json &Json::add(const String &name, const JSType::Element &value) {
-    add(name, value.getValue(), value.getType());
+    add(name, value.as<String>(), value.getType());
+    return *this;
+}
+
+Json &Json::add(const String &name) {
+    add(name, "null", JSType::jsonNull);
     return *this;
 }
 
 JSType::Element &Json::operator[](const String &name) {
-    if (contains(name)) {
-        return doc.at(name);
+    if (!contains(name)) {
+        add(name);
     }
-    return _emptyElement;
+    return doc.at(name);
 }
 
 JSType::Element &Json::operator[](const uint16_t &index) {
-    if (indexList.count(index) > 0) {
-        return getElement(index);
-    }
-    return _emptyElement;
+    return getElement(index);
 }
 
 JSType::Element &Json::getElement(const String &name) {
-    if (contains(name)) {
-        return doc.at(name);
+    if (!contains(name)) {
+        add(name);
     }
-    return _emptyElement;
+    return doc.at(name);
 }
 
 JSType::Element &Json::getElement(const uint16_t &index) {
-    if (indexList.count(index) > 0) {
-        return doc.at(indexList.at(index));
-    }
-    return _emptyElement;
+    return doc.at(indexList.at(index));
 }
 
 const JSType::Element &Json::operator[](const String &name) const {
-    if (contains(name)) {
-        return doc.at(name);
-    }
-    return _emptyElement;
+    return doc.at(name);
 }
 
 const JSType::Element &Json::operator[](const uint16_t &index) const {
-    if (indexList.count(index) > 0) {
-        return doc.at(indexList.at(index));
-    }
-    return _emptyElement;
+    return doc.at(indexList.at(index));
 }
 
 const JSType::Element &Json::getElement(const String &name) const {
-    if (contains(name)) {
-        return doc.at(name);
-    }
-    return _emptyElement;
+    return doc.at(name);
 }
 
 const JSType::Element &Json::getElement(const uint16_t &index) const {
-    if (indexList.count(index) > 0) {
-        return doc.at(indexList.at(index));
-    }
-    return _emptyElement;
+    return doc.at(indexList.at(index));
 }
 
 JSType::Type Json::getType(const String &name) const {
-    if (contains(name)) {
-        return doc.at(name).getType();
-    }
-    return JSType::undefined;
+    return doc.at(name).getType();
 }
 
 JSType::Type Json::getType(const uint16_t &index) const {
-    if (indexList.count(index) > 0) {
-        return doc.at(indexList.at(index)).getType();
-    }
-    return JSType::undefined;
+    return doc.at(indexList.at(index)).getType();
 }
 
 String Json::getTypeString(const String &name) const {
-    if (contains(name)) {
-        return JSUtil.typeToString(doc.at(name).getType());
-    }
-    return JSUtil.typeToString(JSType::undefined);
+    return JSUtil.typeToString(doc.at(name).getType());
 }
 
 String Json::getTypeString(const uint16_t &index) const {
-    if (indexList.count(index) > 0) {
-        return JSUtil.typeToString(doc.at(indexList.at(index)).getType());
-    }
-    return JSUtil.typeToString(JSType::undefined);
+    return JSUtil.typeToString(doc.at(indexList.at(index)).getType());
 }
 
 String Json::getKey(const uint16_t &index) const {
-    if (indexList.count(index) > 0) {
-        return indexList.at(index);
-    }
-    return String();
+    return indexList.at(index);
 }
 
 int16_t Json::getIndex(const String &name) const {
@@ -760,7 +835,7 @@ String Json::toString() const {
             str += ",";
         }
         str += "\"" + getKey(i) + "\":";
-        str += (getElement(i).getType() == JSType::jsonString ? "\"" : "") + getElement(i).getValue() + (getElement(i).getType() == JSType::jsonString ? "\"" : "");
+        str += (getElement(i).getType() == JSType::jsonString ? "\"" : "") + getElement(i).as<String>() + (getElement(i).getType() == JSType::jsonString ? "\"" : "");
     }
     str += "}";
     return str;

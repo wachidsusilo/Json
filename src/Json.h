@@ -1,12 +1,13 @@
 #ifndef JSON_H
 #define JSON_H
 
+#include <iterator>
+#include <map>
+#include <vector>
+
 #include "Arduino.h"
 #include "FlashString.h"
 #include "Log.h"
-#include "iterator"
-#include "map"
-#include "vector"
 
 class Json;
 class JsonArray;
@@ -20,14 +21,16 @@ class JSType {
         jsonFloat,
         jsonString,
         jsonBoolean,
-        jsonNull,
-        undefined
+        jsonNull
     };
 
     struct Element {
        private:
         String *value;
         Type type;
+        Json *object;
+        JsonArray *array;
+        void release();
 
        public:
         Element();
@@ -45,33 +48,34 @@ class JSType {
         Element(const double &);
         Element(const String &);
         Element(const char *);
-        Element(const void *);
         Element(const bool &);
         Element(const Json &);
         Element(const JsonArray &);
 
-        operator int8_t();
-        operator int16_t();
-        operator int32_t();
-        operator uint8_t();
-        operator uint16_t();
-        operator uint32_t();
-        operator float();
-        operator double();
-        operator String();
-        operator void *();
-        operator bool();
-        operator Json();
-        operator JsonArray();
+        operator int8_t() const;
+        operator int16_t() const;
+        operator int32_t() const;
+        operator uint8_t() const;
+        operator uint16_t() const;
+        operator uint32_t() const;
+        operator float() const;
+        operator double() const;
+        operator void *() const;
+        operator bool() const;
+        operator String() const;
+        operator Json&();
+        operator JsonArray&();
 
         Element &operator=(const Element &);
 
         template <typename T>
         T as() { return *this; }
 
+        template <typename T>
+        const T as() const { return *this; }
+
         Type getType() const;
-        String &getValue();
-        const String &getValue() const;
+        String toString();
         bool operator==(const Element &e) const;
     };
 };
@@ -98,10 +102,12 @@ class JsonArray {
     JsonArray();
     JsonArray(const char *str);
     JsonArray(const String &str);
+    JsonArray(const JsonArray &other);
     JsonArray(std::vector<int> &arr);
 
     JsonArray &push(const String &value, const JSType::Type &type);
     JsonArray &push(const JSType::Element &value);
+    JsonArray &push();
 
     JSType::Element &operator[](const uint16_t &index);
     JSType::Element &getElement(const uint16_t &index);
@@ -129,9 +135,11 @@ class Json {
     Json();
     Json(const char *str);
     Json(const String &str);
+    Json(const Json &other);
 
     Json &add(const String &name, const String &value, const JSType::Type &type);
     Json &add(const String &name, const JSType::Element &value);
+    Json &add(const String &name);
 
     JSType::Element &operator[](const String &name);
     JSType::Element &operator[](const uint16_t &index);

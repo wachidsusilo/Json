@@ -1,5 +1,5 @@
 ## Json Library for Arduino, ESP8266, and ESP32
-A Simple yet easy to use Json library to _parse_ and _stringify_ a `Json` object. No need to allocate buffer, no need additional setup, just create your `Json` object and you are done!
+A Simple and easy to use Json library to _parse_ and _stringify_ a `Json` object. No need to allocate buffer, no need additional setup, just create your `Json` object and you are done!
 
 ## Example
 Using `Json` is as simple as it should be!
@@ -31,7 +31,7 @@ json.add("object"  , Json()
 ```
 
 ### Retrieving Elements from a Json Object
-To get the value, you can cast it or just assign it to an existing variable.
+Retrieving element is very easy, you can cast it or just assign it to an existing variable. If such element doesn't exist, a new element with the provided key will be created. Those newly created elements will contain value `null`.
 ```c++
 //Assign elements to the existing variable
 String    value   = json["key"];
@@ -59,13 +59,18 @@ Serial.println(json["array"].as<JsonArray>());
 ```
 
 ### Modifying Elements of a Json Object
+Assigning a direct child is very easy and straightforward. Assigning a nested object on the other hand, you need to cast it as a reference to be able to change it's value. The new value doesn't necessarily has the same type as the old value. You can assign the existing element with an arbitrary value and type.
 ```c++
 json["key"]      = "new value";
-json["integer"]  = 5;
+json["integer"]  = "i am not an integer anymore";
 json["float"]    = 6.28;
-json["boolean"]  = false;
+json["boolean"]  = "i am also not a boolean anymore";
 json["object"]   = Json().add("key", "value");
 json["array"]    = JsonArray().push("value");
+
+//Nested Object
+json["object"].as<Json&>()["key"] = "new value"
+json["array"].as<JsonArray&>()[0] = "new value"
 ```
 
 ### Miscellaneous
