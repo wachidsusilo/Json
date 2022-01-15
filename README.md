@@ -5,7 +5,7 @@ A Simple and easy to use Json library to _parse_ and _stringify_ a `Json` object
 Using `Json` is as simple as it should be!
 
 ### Parse Json from String
-Just create `Json` object and the String into it's constructor.
+Just create `Json` object and put the String into it's constructor.
 ```c++
 Json      json("{\"name\":\"John\", \"age\":30, \"car\":null}");
 JsonArray jsonArray("[3.14, false, \"Hello World\"]");
