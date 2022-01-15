@@ -105,7 +105,15 @@ void setup() {
                         .add("blue", 162)
                         .add("alpha", 255));
 
-    Serial.println("\n++++ Get value from a Json Object +++++\n");
+    Serial.println("\n++++ Get value from a Json Object by using template (generic) +++++\n");
+    Serial.println(js["name"].as<String>());
+    Serial.println(js["year"].as<int>());
+    Serial.println(js["isNotified"].as<bool>());
+    Serial.println(js["pi"].as<float>());
+    Serial.println(js["my-array"].as<JsonArray>().toString());
+    Serial.println(js["color"].as<Json>().toString());
+
+    Serial.println("\n++++ Get value from a Json Object by assigning it to the existing variable +++++\n");
 
     /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
     /**

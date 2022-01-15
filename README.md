@@ -33,12 +33,29 @@ json.add("object"  , Json()
 ### Retrieving Elements from a Json Object
 To get the value, you can cast it or just assign it to an existing variable.
 ```c++
+//Assign elements to the existing variable
 String    value   = json["key"];
 int       integer = json["integer"];
 float     pi      = json["float"];
 bool      isAlive = json["boolean"];
 Json      obj     = json["object"];
-JsonArray arr     = json["array"];  
+JsonArray arr     = json["array"];
+
+//Retrieve elements by casting
+Serial.println((String)    json["key"]);
+Serial.println((int)       json["integer"]);
+Serial.println((float)     json["float"]);
+Serial.println((bool)      json["boolean"]);
+Serial.println((Json)      json["object"]);
+Serial.println((JsonArray) json["array"]);
+
+//Retrieve elements using template (generic)
+Serial.println(json["key"].as<String>());
+Serial.println(json["integer"].as<int>());
+Serial.println(json["float"].as<float>());
+Serial.println(json["boolean"].as<bool>());
+Serial.println(json["object"].as<Json>());
+Serial.println(json["array"].as<JsonArray>());
 ```
 
 ### Modifying Elements of a Json Object

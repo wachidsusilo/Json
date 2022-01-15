@@ -66,6 +66,9 @@ class JSType {
 
         Element &operator=(const Element &);
 
+        template <typename T>
+        T as() { return *this; }
+
         Type getType() const;
         String &getValue();
         const String &getValue() const;
