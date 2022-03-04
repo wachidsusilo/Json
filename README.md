@@ -18,7 +18,7 @@ json.add("key"     , "value");
 json.add("integer" , 2);
 json.add("float"   , 3.141592, 6);
 json.add("boolean" , true);
-json.add("null"    , (void*)NULL);
+json.add("null");
 json.add("array"   , JsonArray()
                         .push(2)
                         .push(3.14)
@@ -79,8 +79,8 @@ Other methods are described here.
 //Stringify a Json object
 String payload = json.toString();
 
-//Deleting element
-json.erase("key");
+//Removing element
+json.remove("key");
 
 //Get the type of the element
 String type = json.getTypeString("key");
@@ -92,10 +92,10 @@ size_t size = json.size();
 bool isExist = json.contains("key");
 
 //Attach debugger
-Json::attachDebugger(Serial);
+JSUtil.attachDebugger(Serial);
 
 //Detach debugger
-Json::detachDebugger();
+JSUtil.detachDebugger();
 
 //Iterating element
 for (auto& element : json) {

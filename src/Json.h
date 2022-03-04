@@ -6,8 +6,6 @@
 #include <vector>
 
 #include "Arduino.h"
-#include "FlashString.h"
-#include "Log.h"
 
 class Json;
 class JsonArray;
@@ -31,6 +29,7 @@ class JSType {
         Json *object;
         JsonArray *array;
         void release();
+        int compareTo(const Element &e) const;
 
        public:
         Element();
@@ -60,13 +59,111 @@ class JSType {
         operator uint32_t() const;
         operator float() const;
         operator double() const;
-        operator void *() const;
         operator bool() const;
         operator String() const;
-        operator Json&();
-        operator JsonArray&();
+        operator Json &();
+        operator JsonArray &();
 
         Element &operator=(const Element &);
+        Element &operator[](const int8_t &index);
+        Element &operator[](const int16_t &index);
+        Element &operator[](const int32_t &index);
+        Element &operator[](const uint8_t &index);
+        Element &operator[](const uint16_t &index);
+        Element &operator[](const uint32_t &index);
+        Element &operator[](const String &key);
+        Element &operator[](const char *key);
+
+        bool operator==(const Element &e) const;
+        bool operator==(const int8_t &e) const;
+        bool operator==(const int16_t &e) const;
+        bool operator==(const int32_t &e) const;
+        bool operator==(const uint8_t &e) const;
+        bool operator==(const uint16_t &e) const;
+        bool operator==(const uint32_t &e) const;
+        bool operator==(const float &e) const;
+        bool operator==(const double &e) const;
+        bool operator==(const bool &e) const;
+        bool operator==(const char *e) const;
+        bool operator==(const String &e) const;
+        bool operator==(const Json &e);
+        bool operator==(const JsonArray &e);
+
+        bool operator!=(const Element &e) const;
+        bool operator!=(const int8_t &e) const;
+        bool operator!=(const int16_t &e) const;
+        bool operator!=(const int32_t &e) const;
+        bool operator!=(const uint8_t &e) const;
+        bool operator!=(const uint16_t &e) const;
+        bool operator!=(const uint32_t &e) const;
+        bool operator!=(const float &e) const;
+        bool operator!=(const double &e) const;
+        bool operator!=(const bool &e) const;
+        bool operator!=(const char *e) const;
+        bool operator!=(const String &e) const;
+        bool operator!=(const Json &e);
+        bool operator!=(const JsonArray &e);
+
+        bool operator<(const Element &e) const;
+        bool operator<(const int8_t &e) const;
+        bool operator<(const int16_t &e) const;
+        bool operator<(const int32_t &e) const;
+        bool operator<(const uint8_t &e) const;
+        bool operator<(const uint16_t &e) const;
+        bool operator<(const uint32_t &e) const;
+        bool operator<(const float &e) const;
+        bool operator<(const double &e) const;
+        bool operator<(const bool &e) const;
+        bool operator<(const char *e) const;
+        bool operator<(const String &e) const;
+
+        bool operator>(const Element &e) const;
+        bool operator>(const int8_t &e) const;
+        bool operator>(const int16_t &e) const;
+        bool operator>(const int32_t &e) const;
+        bool operator>(const uint8_t &e) const;
+        bool operator>(const uint16_t &e) const;
+        bool operator>(const uint32_t &e) const;
+        bool operator>(const float &e) const;
+        bool operator>(const double &e) const;
+        bool operator>(const bool &e) const;
+        bool operator>(const char *e) const;
+        bool operator>(const String &e) const;
+
+        bool operator<=(const Element &e) const;
+        bool operator<=(const int8_t &e) const;
+        bool operator<=(const int16_t &e) const;
+        bool operator<=(const int32_t &e) const;
+        bool operator<=(const uint8_t &e) const;
+        bool operator<=(const uint16_t &e) const;
+        bool operator<=(const uint32_t &e) const;
+        bool operator<=(const float &e) const;
+        bool operator<=(const double &e) const;
+        bool operator<=(const bool &e) const;
+        bool operator<=(const char *e) const;
+        bool operator<=(const String &e) const;
+
+        bool operator>=(const Element &e) const;
+        bool operator>=(const int8_t &e) const;
+        bool operator>=(const int16_t &e) const;
+        bool operator>=(const int32_t &e) const;
+        bool operator>=(const uint8_t &e) const;
+        bool operator>=(const uint16_t &e) const;
+        bool operator>=(const uint32_t &e) const;
+        bool operator>=(const float &e) const;
+        bool operator>=(const double &e) const;
+        bool operator>=(const bool &e) const;
+        bool operator>=(const char *e) const;
+        bool operator>=(const String &e) const;
+
+        int32_t toInt() const;
+        uint32_t toUInt() const;
+        float toFloat() const;
+        double toDouble() const;
+        bool toBool() const;
+        String toString() const;
+        Json &toJson();
+        JsonArray &toArray();
 
         template <typename T>
         T as() { return *this; }
@@ -75,13 +172,22 @@ class JSType {
         const T as() const { return *this; }
 
         Type getType() const;
-        String toString();
-        bool operator==(const Element &e) const;
+        String getTypeName() const;
+        
+        bool isNull() const;
+        bool isEmpty() const;
+        bool isNotEmpty() const;
     };
 };
 
 class JsonUtil {
    public:
+    enum class LogLevel {
+        Error,
+        Info,
+        Warning
+    };
+
     void parse(const char *str, Json *doc, JsonArray *v);
     bool isFloat(const String &str);
     String typeToString(const JSType::Type &type);
@@ -90,8 +196,13 @@ class JsonUtil {
     String removeInsignificantZeros(const String &str);
     String toString(const float &value);
     String toString(const double &value);
+    void remove(String &str, const int &len, const bool &fromEnd = false);
+    void attachDebugger(HardwareSerial &serial);
+    void detachDebugger();
+    void log(const LogLevel &level, const String &tag, const String &message);
 
    private:
+    HardwareSerial *serial;
     void prettyPrint(HardwareSerial &serial, Json *doc, JsonArray *v, const uint8_t &spaceTab, const uint8_t &space);
 };
 
@@ -100,13 +211,12 @@ extern JsonUtil JSUtil;
 class JsonArray {
    public:
     JsonArray();
-    JsonArray(const char *str);
     JsonArray(const String &str);
     JsonArray(const JsonArray &other);
     JsonArray(std::vector<int> &arr);
+    explicit JsonArray(const char *str);
 
-    JsonArray &push(const String &value, const JSType::Type &type);
-    JsonArray &push(const JSType::Element &value);
+    JsonArray &push(JSType::Element value);
     JsonArray &push();
 
     JSType::Element &operator[](const uint16_t &index);
@@ -115,13 +225,18 @@ class JsonArray {
     const JSType::Element &operator[](const uint16_t &index) const;
     const JSType::Element &getElement(const uint16_t &index) const;
 
+    bool operator==(const JsonArray &other) const;
+
     JSType::Type getType(const uint16_t &index) const;
-    String getTypeString(const uint16_t &index) const;
+    String getTypeName(const uint16_t &index) const;
     String toString() const;
 
     size_t size() const;
+    size_t lastIndex() const;
     bool contains(const JSType::Element &e) const;
-    void erase(const uint16_t &index);
+    bool isEmpty() const;
+    bool isNotEmpty() const;
+    void remove(const uint16_t &index);
     void clear();
     std::vector<JSType::Element>::iterator begin();
     std::vector<JSType::Element>::iterator end();
@@ -133,12 +248,11 @@ class JsonArray {
 class Json {
    public:
     Json();
-    Json(const char *str);
     Json(const String &str);
     Json(const Json &other);
+    explicit Json(const char *str);
 
-    Json &add(const String &name, const String &value, const JSType::Type &type);
-    Json &add(const String &name, const JSType::Element &value);
+    Json &add(String name, JSType::Element value);
     Json &add(const String &name);
 
     JSType::Element &operator[](const String &name);
@@ -151,10 +265,12 @@ class Json {
     const JSType::Element &getElement(const String &name) const;
     const JSType::Element &getElement(const uint16_t &index) const;
 
+    bool operator==(const Json &other) const;
+
     JSType::Type getType(const String &name) const;
     JSType::Type getType(const uint16_t &index) const;
-    String getTypeString(const String &name) const;
-    String getTypeString(const uint16_t &index) const;
+    String getTypeName(const String &name) const;
+    String getTypeName(const uint16_t &index) const;
     String getKey(const uint16_t &index) const;
 
     int16_t getIndex(const String &name) const;
@@ -162,13 +278,12 @@ class Json {
 
     size_t size() const;
     bool contains(String name) const;
-    void erase(const String &name);
+    bool isEmpty() const;
+    bool isNotEmpty() const;
+    void remove(const String &name);
     void clear();
     std::map<String, JSType::Element>::iterator begin();
     std::map<String, JSType::Element>::iterator end();
-
-    static void attachDebugger(HardwareSerial &serial);
-    static void detachDebugger();
 
    private:
     std::map<String, JSType::Element> doc;

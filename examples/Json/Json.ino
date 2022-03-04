@@ -7,7 +7,7 @@ void printValue(String name, String value, String type) {
 
 void setup() {
     Serial.begin(115200);
-    Json::attachDebugger(Serial);
+    JSUtil.attachDebugger(Serial);
     delay(1000);
 
     Serial.println("******** Json Example *********\n");
@@ -24,7 +24,7 @@ void setup() {
     Serial.println(String("Is contain 'frog'? ") + (isContain ? "value with name 'frog' does exist" : "value with name 'frog' does not exist"));
 
     /*erase value with specified name*/
-    json.erase("number4");
+    json.remove("number4");
     Serial.println("Value with name 'number4' has been deleted");
 
     /*Get type of specified name (JSType::Type)*/
@@ -41,15 +41,15 @@ void setup() {
      including: string, integer, float, boolean,
      null, array, and object
   */
-    String type = json.getTypeString("name");
+    String type = json.getTypeName("name");
     Serial.println("Type of 'name' is (" + type + ")");
-    type = json.getTypeString("fields");
+    type = json.getTypeName("fields");
     Serial.println("Type of 'fields' is (" + type + ")");
 
     /*Get type and name(key) of Json Object*/
     Serial.println("\nThis Json Object contains:");
     for (int i = 0; i < json.size(); i++) {
-        Serial.println("(" + json.getTypeString(i) + ") " + json.getKey(i));
+        Serial.println("(" + json.getTypeName(i) + ") " + json.getKey(i));
     }
 
     /*Stringify Json Object without indentation (compact)*/
@@ -79,31 +79,72 @@ void setup() {
     js.add("pi", 3.14159265359);
 
     /**Add nullValue*/
-    js.add("pointer", (void*)NULL);
+    js.add("pointer");
 
     /*Create Array*/
     JsonArray jsonArray;
-    jsonArray.push("jessica");    //insert String
-    jsonArray.push(65432);        //insert int
-    jsonArray.push(false);        //insert boolean
-    jsonArray.push(5.234);        //insert float
-    jsonArray.push((void*)NULL);  //insert null
-    jsonArray.push(JsonArray()    //insert Array
+    jsonArray.push("jessica");    // insert String
+    jsonArray.push(65432);        // insert int
+    jsonArray.push(false);        // insert boolean
+    jsonArray.push(5.234);        // insert float
+    jsonArray.push();             // insert null
+    jsonArray.push(JsonArray()    // insert Array
                        .push("height")
                        .push(165));
-    jsonArray.push(Json()  //insert Json Object
+    jsonArray.push(Json()  // insert Json Object
                        .add("name", "Hannah")
                        .add("body-weight", 65));
 
     /*Add Array*/
     js.add("my-array", jsonArray);
 
+    /*Create Object*/
+    Json color;
+    color.add("red", 65);
+    color.add("green", 212);
+    color.add("blue", 162);
+    color.add("alpha", 255);
+
     /*Add Object*/
-    js.add("color", Json()
-                        .add("red", 65)
-                        .add("green", 212)
-                        .add("blue", 162)
-                        .add("alpha", 255));
+    js.add("color", color);
+
+    Serial.println("\n++++ Equality Check +++++\n");
+    Serial.println("Is name equal to 'michael'? " + String(js["name"] == "michael" ? "Yes" : "No"));
+    Serial.println("Is year equal to 2021? " + String(js["year"] == 2021 ? "Yes" : "No"));
+    Serial.println("Is pi equal to 3.14159265359? " + String(js["pi"] == 3.14159265359 ? "Yes" : "No"));
+    Serial.println("Is isNotified equal to true? " + String(js["isNotified"] == true ? "Yes" : "No"));
+    Serial.println("Is pointer equal to NULL? " + String(js["pointer"].isNull() ? "Yes" : "No"));
+    Serial.println("Is my-array equal to " + jsonArray.toString() + "? " + String(js["my-array"] == jsonArray ? "Yes" : "No"));
+    Serial.println("Is color equal to " + color.toString() + "? " + String(js["color"] == color ? "Yes" : "No"));
+
+    Serial.println("\n++++ Inequality Check +++++\n");
+    Serial.println("Is name not equal to 'michael'? " + String(js["name"] != "michael" ? "Yes" : "No"));
+    Serial.println("Is year not equal to 2021? " + String(js["year"] != 2021 ? "Yes" : "No"));
+    Serial.println("Is pi not equal to 3.14159265359? " + String(js["pi"] != 3.14159265359 ? "Yes" : "No"));
+    Serial.println("Is isNotified not equal to true? " + String(js["isNotified"] != true ? "Yes" : "No"));
+    Serial.println("Is pointer not equal to NULL? " + String(!js["pointer"].isNull() ? "Yes" : "No"));
+    Serial.println("Is my-array not equal to " + jsonArray.toString() + "? " + String(js["my-array"] != jsonArray ? "Yes" : "No"));
+    Serial.println("Is color not equal to " + color.toString() + "? " + String(js["color"] != color ? "Yes" : "No"));
+    
+    Serial.println("\n++++ Greater Than Check +++++\n");
+    Serial.println("Is name is greater than 'jessica'? " + String(js["name"] > "jessica" ? "Yes" : "No"));
+    Serial.println("Is pi greater than 3.14? " + String(js["pi"] > 3.14 ? "Yes" : "No"));
+    Serial.println("Is year greater than 2020? " + String(js["year"] > 2020 ? "Yes" : "No"));
+
+    Serial.println("\n++++ Less Than Check +++++\n");
+    Serial.println("Is name is less than 'patrick'? " + String(js["name"] < "patrick" ? "Yes" : "No"));
+    Serial.println("Is pi less than 3.15? " + String(js["pi"] < 3.15 ? "Yes" : "No"));
+    Serial.println("Is year less than 2022? " + String(js["year"] < 2022 ? "Yes" : "No"));
+
+    Serial.println("\n++++ Greater Than or Equal Check +++++\n");
+    Serial.println("Is name is greater than or equal to 'jessica'? " + String(js["name"] >= "jessica" ? "Yes" : "No"));
+    Serial.println("Is pi greater than or equal to 3.14? " + String(js["pi"] >= 3.14 ? "Yes" : "No"));
+    Serial.println("Is year greater than or equal to 2020? " + String(js["year"] >= 2020 ? "Yes" : "No"));
+
+    Serial.println("\n++++ Less Than or Equal Check +++++\n");
+    Serial.println("Is name is less than or equal to 'patrick'? " + String(js["name"] <= "patrick" ? "Yes" : "No"));
+    Serial.println("Is pi less than or equal to 3.15? " + String(js["pi"] <= 3.15 ? "Yes" : "No"));
+    Serial.println("Is year less than or equal to 2022? " + String(js["year"] <= 2022 ? "Yes" : "No"));
 
     Serial.println("\n++++ Get value from a Json Object by using template (generic) +++++\n");
     Serial.println(js["name"].as<String>());
@@ -112,6 +153,19 @@ void setup() {
     Serial.println(js["pi"].as<float>());
     Serial.println(js["my-array"].as<JsonArray>().toString());
     Serial.println(js["color"].as<Json>().toString());
+
+    Serial.println("\n++++ Get Value of Nested Object +++++\n");
+    printValue("js(my-array)(0)", js["my-array"][0], js["my-array"][0].getTypeName());
+    printValue("js(my-array)(1)", js["my-array"][1], js["my-array"][1].getTypeName());
+    printValue("js(my-array)(2)", js["my-array"][2], js["my-array"][2].getTypeName());
+    printValue("js(my-array)(3)", js["my-array"][3], js["my-array"][3].getTypeName());
+    printValue("js(my-array)(4)", js["my-array"][4], js["my-array"][4].getTypeName());
+    printValue("js(my-array)(5)", js["my-array"][5], js["my-array"][5].getTypeName());
+    printValue("js(my-array)(5)(0)", js["my-array"][5][0], js["my-array"][5][0].getTypeName());
+    printValue("js(my-array)(5)(1)", js["my-array"][5][1], js["my-array"][5][1].getTypeName());
+    printValue("js(my-array)(6)", js["my-array"][6], js["my-array"][6].getTypeName());
+    printValue("js(my-array)(6)(name)", js["my-array"][6]["name"], js["my-array"][6]["name"].getTypeName());
+    printValue("js(my-array)(6)(body-weight)", js["my-array"][6]["body-weight"], js["my-array"][6]["body-weight"].getTypeName());
 
     Serial.println("\n++++ Get value from a Json Object by assigning it to the existing variable +++++\n");
 
@@ -127,41 +181,43 @@ void setup() {
   */
     /*Get stringValue*/
     String name = js.getElement("name");
-    printValue("name", name, js.getTypeString("name"));
+    printValue("name", name, js.getTypeName("name"));
 
     /*Get integerValue (32 bit)*/
     int year = js["year"];
-    printValue("year", String(year), js.getTypeString("year"));
+    printValue("year", String(year), js.getTypeName("year"));
 
     /*Get booleanValue*/
     bool isNotified = js.getElement("isNotified");
-    printValue("isNotified", isNotified ? "true" : "false", js.getTypeString("isNotified"));
+    printValue("isNotified", isNotified ? "true" : "false", js.getTypeName("isNotified"));
 
     /*Set the value of an element*/
     js["isNotified"] = false;
     isNotified = js.getElement("isNotified");
-    printValue("isNotified", isNotified ? "true" : "false", js.getTypeString("isNotified"));
+    printValue("isNotified", isNotified ? "true" : "false", js.getTypeName("isNotified"));
 
     /*Get floatValue*/
     float piFloat = js["pi"];
-    printValue("pi", String(piFloat, 15), js.getTypeString("pi"));
+    printValue("pi", String(piFloat, 15), js.getTypeName("pi"));
 
     /*Get doubleValue*/
     double piDouble = js.getElement("pi");
-    printValue("pi", String(piDouble, 15), js.getTypeString("pi"));
-
-    /*Get nullValue*/
-    void* ptr = js["pointer"];
-    printValue("pointer", String((int)ptr), js.getTypeString("pointer"));
+    printValue("pi", String(piDouble, 15), js.getTypeName("pi"));
 
     /*Get Array*/
     JsonArray arr = js.getElement("my-array");
-    printValue("my-array", "", js.getTypeString("my-array"));
+    printValue("my-array", "", js.getTypeName("my-array"));
     JSUtil.prettyPrint(Serial, arr);
 
     /*Get Json Object*/
     Json obj = js["color"];
-    printValue("color", "", js.getTypeString("color"));
+    printValue("color", "", js.getTypeName("color"));
+    JSUtil.prettyPrint(Serial, obj);
+
+    /*Set the value of a nested object*/
+    js["color"].as<Json&>()["red"] = 255;
+    obj = js["color"];
+    printValue("color", "", js.getTypeName("color"));
     JSUtil.prettyPrint(Serial, obj);
 
     Serial.println("\n++++ Get value from a Json Array +++++\n");
@@ -178,36 +234,32 @@ void setup() {
   */
     /*Get stringValue*/
     String m_string = jsonArray[0];
-    printValue("0", m_string, jsonArray.getTypeString(0));
+    printValue("0", m_string, jsonArray.getTypeName(0));
 
     /*Get integerValue (32 bit)*/
     int m_int = jsonArray.getElement(1);
-    printValue("1", String(m_int), jsonArray.getTypeString(1));
+    printValue("1", String(m_int), jsonArray.getTypeName(1));
 
     /*Get booleanValue*/
     bool m_bool = jsonArray[2];
-    printValue("2", m_bool ? "true" : "false", jsonArray.getTypeString(2));
+    printValue("2", m_bool ? "true" : "false", jsonArray.getTypeName(2));
 
     /*Get floatValue*/
     float m_float = jsonArray.getElement(3);
-    printValue("3", String(m_float, 15), jsonArray.getTypeString(3));
+    printValue("3", String(m_float, 15), jsonArray.getTypeName(3));
 
     /*Get doubleValue*/
     double m_double = jsonArray[3];
-    printValue("3", String(m_double, 15), jsonArray.getTypeString(3));
-
-    /*Get nullValue*/
-    void* m_void = jsonArray.getElement(4);
-    printValue("4", String((int)m_void), jsonArray.getTypeString(4));
+    printValue("3", String(m_double, 15), jsonArray.getTypeName(3));
 
     /*Get Array*/
     JsonArray m_arr = jsonArray[5];
-    printValue("5", "", jsonArray.getTypeString(5));
+    printValue("5", "", jsonArray.getTypeName(5));
     JSUtil.prettyPrint(Serial, m_arr);
 
     /*Get Json Object*/
     Json m_json = jsonArray.getElement(6);
-    printValue("6", "", jsonArray.getTypeString(6));
+    printValue("6", "", jsonArray.getTypeName(6));
     JSUtil.prettyPrint(Serial, m_json);
 
     std::vector<int> data;
@@ -220,7 +272,7 @@ void loop() {
     if (Serial.available()) {
         String str = Serial.readString();
         if (str.equals("a")) {
-            Serial.println(ESP.getFreeHeap());
+            // Serial.println(ESP.getFreeHeap());
         } else {
             /*Get Json Array from PROGMEM*/
             JsonArray js(data);
