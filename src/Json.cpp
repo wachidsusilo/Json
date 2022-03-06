@@ -18,19 +18,19 @@ JSType::Element::Element(const Element &e)
     type = e.type;
     switch (type) {
         case jsonObject:
-            if (e.value) {
-                value = new String(*e.value);
-            } else if (e.object) {
+            if (e.object) {
                 object = new Json(*e.object);
+            } else if (e.value) {
+                value = new String(*e.value);
             } else {
                 object = new Json();
             }
             break;
         case jsonArray:
-            if (e.value) {
-                value = new String(*e.value);
-            } else if (e.array) {
+            if (e.array) {
                 array = new JsonArray(*e.array);
+            } else if (e.value) {
+                value = new String(*e.value);
             } else {
                 array = new JsonArray();
             }
@@ -75,10 +75,10 @@ JSType::Element::Element(const bool &value)
     : value(new String(value ? "true" : "false")), type(jsonBoolean), object(NULL), array(NULL) {}
 
 JSType::Element::Element(const Json &value)
-    : value(NULL), type(jsonObject), object(new Json(value.toString())), array(NULL) {}
+    : value(NULL), type(jsonObject), object(new Json(value)), array(NULL) {}
 
 JSType::Element::Element(const JsonArray &value)
-    : value(NULL), type(jsonArray), object(NULL), array(new JsonArray(value.toString())) {}
+    : value(NULL), type(jsonArray), object(NULL), array(new JsonArray(value)) {}
 
 JSType::Element::operator int8_t() const {
     if (!value) return 0;
@@ -164,6 +164,35 @@ JSType::Element::operator String() const {
     }
 }
 
+JSType::Element::operator char *() {
+    switch (type) {
+        case jsonObject:
+            if (value) {
+                return const_cast<char *>(value->c_str());
+            } else if (object) {
+                value = new String(object->toString());
+                return const_cast<char *>(value->c_str());
+            } else {
+                return NULL;
+            }
+        case jsonArray:
+            if (value) {
+                return const_cast<char *>(value->c_str());
+            } else if (array) {
+                value = new String(array->toString());
+                return const_cast<char *>(value->c_str());
+            } else {
+                return NULL;
+            }
+        default:
+            if (value) {
+                return const_cast<char *>(value->c_str());
+            } else {
+                return NULL;
+            }
+    }
+}
+
 JSType::Element::operator Json &() {
     static Json emptyJson;
     if (!object) {
@@ -200,19 +229,19 @@ JSType::Element &JSType::Element::operator=(const Element &e) {
     type = e.getType();
     switch (type) {
         case jsonObject:
-            if (e.value) {
-                value = new String(*e.value);
-            } else if (e.object) {
+            if (e.object) {
                 object = new Json(*e.object);
+            } else if (e.value) {
+                value = new String(*e.value);
             } else {
                 object = new Json();
             }
             break;
         case jsonArray:
-            if (e.value) {
-                value = new String(*e.value);
-            } else if (e.array) {
+            if (e.array) {
                 array = new JsonArray(*e.array);
+            } else if (e.value) {
+                value = new String(*e.value);
             } else {
                 array = new JsonArray();
             }
@@ -271,18 +300,18 @@ bool JSType::Element::operator==(const Element &e) const {
                 return false;
             }
             if (value) {
-                if (e.value) {
-                    return Json(*value) == Json(*e.value);
-                } else if (e.object) {
+                if (e.object) {
                     return Json(*value) == *e.object;
+                } else if (e.value) {
+                    return Json(*value) == Json(*e.value);
                 } else {
                     return false;
                 }
             } else if (object) {
-                if (e.value) {
-                    return *object == Json(*e.value);
-                } else if (e.object) {
+                if (e.object) {
                     return *object == *e.object;
+                } else if (e.value) {
+                    return *object == Json(*e.value);
                 } else {
                     return false;
                 }
@@ -294,18 +323,18 @@ bool JSType::Element::operator==(const Element &e) const {
                 return false;
             }
             if (value) {
-                if (e.value) {
-                    return JsonArray(*value) == JsonArray(*e.value);
-                } else if (e.array) {
+                if (e.array) {
                     return JsonArray(*value) == *e.array;
+                } else if (e.value) {
+                    return JsonArray(*value) == JsonArray(*e.value);
                 } else {
                     return false;
                 }
             } else if (array) {
-                if (e.value) {
-                    return *array == JsonArray(*e.value);
-                } else if (e.array) {
+                if (e.array) {
                     return *array == *e.array;
+                } else if (e.value) {
+                    return *array == JsonArray(*e.value);
                 } else {
                     return false;
                 }
@@ -403,20 +432,6 @@ bool JSType::Element::operator==(const String &e) const {
     return false;
 }
 
-bool JSType::Element::operator==(const Json &e) {
-    if (type == jsonObject) {
-        return as<Json &>() == e;
-    }
-    return false;
-}
-
-bool JSType::Element::operator==(const JsonArray &e) {
-    if (type == jsonArray) {
-        return as<JsonArray &>() == e;
-    }
-    return false;
-}
-
 bool JSType::Element::operator!=(const Element &e) const {
     return !operator==(e);
 }
@@ -462,14 +477,6 @@ bool JSType::Element::operator!=(const char *e) const {
 }
 
 bool JSType::Element::operator!=(const String &e) const {
-    return !operator==(e);
-}
-
-bool JSType::Element::operator!=(const Json &e) {
-    return !operator==(e);
-}
-
-bool JSType::Element::operator!=(const JsonArray &e) {
     return !operator==(e);
 }
 
@@ -717,6 +724,108 @@ String JSType::Element::getTypeName() const {
     return JSUtil.typeToString(type);
 }
 
+size_t JSType::Element::size() const {
+    switch (type) {
+        case jsonObject:
+            if (object) {
+                return object->size();
+            } else if (value) {
+                return Json(*value).size();
+            } else {
+                return 0;
+            }
+        case jsonArray:
+            if (array) {
+                return array->size();
+            } else if (value) {
+                return JsonArray(*value).size();
+            } else {
+                return 0;
+            }
+        case jsonString:
+            if (value) {
+                return value->length();
+            } else {
+                return 0;
+            }
+        default:
+            return 0;
+    }
+}
+
+size_t JSType::Element::lastIndex() const {
+    size_t len = size();
+    return len == 0 ? 0 : len - 1;
+}
+
+void JSType::Element::remove(const size_t &index) {
+    if (type == jsonArray) {
+        as<JsonArray &>().remove(index);
+    }
+}
+
+void JSType::Element::remove(const String &key) {
+    if (type == jsonObject) {
+        as<Json &>().remove(key);
+    }
+}
+
+void JSType::Element::clear() {
+    switch (type) {
+        case jsonObject:
+            as<Json &>().clear();
+            break;
+        case jsonArray:
+            as<JsonArray &>().clear();
+            break;
+        case jsonString:
+            if (value) {
+                value->clear();
+            }
+            break;
+        case jsonInteger:
+        case jsonFloat:
+            if (value) {
+                *value = "0";
+            }
+            break;
+        case jsonBoolean:
+            if (value) {
+                *value = "false";
+            }
+            break;
+    }
+}
+
+bool JSType::Element::contains(const Element &e) const {
+    switch (type) {
+        case jsonObject:
+            if (value) {
+                return Json(*value).contains(e);
+            } else if (object) {
+                return object->contains(e);
+            } else {
+                return false;
+            }
+        case jsonArray:
+            if (value) {
+                return JsonArray(*value).contains(e);
+            } else if (array) {
+                return array->contains(e);
+            } else {
+                return false;
+            }
+        case jsonString:
+            if (value) {
+                return value->indexOf(e.toString()) != -1;
+            } else {
+                return false;
+            }
+        default:
+            return false;
+    }
+}
+
 bool JSType::Element::isNull() const {
     return type == jsonNull;
 }
@@ -801,6 +910,9 @@ int JSType::Element::compareTo(const Element &e) const {
 
 /**--- Json Utility ---**/
 void JsonUtil::parse(const char *str, Json *doc, JsonArray *v) {
+    if (!str) return;
+    if (!doc && !v) return;
+
     String s(str);
     s.trim();
 
@@ -1050,6 +1162,7 @@ void JsonUtil::parse(const char *str, Json *doc, JsonArray *v) {
 }
 
 void JsonUtil::prettyPrint(HardwareSerial &serial, Json &doc, const uint8_t &spaceTab) {
+    String s = doc.toString();
     prettyPrint(serial, &doc, NULL, spaceTab, 0);
 }
 
@@ -1217,7 +1330,7 @@ JsonArray::JsonArray(std::vector<int> &arr) : v(std::vector<JSType::Element>()) 
     for (int i : arr) push(i);
 }
 
-JsonArray &JsonArray::push(JSType::Element value) {
+JsonArray &JsonArray::push(const JSType::Element &value) {
     v.push_back(value);
     return *this;
 }
@@ -1352,9 +1465,13 @@ Json::Json(const String &str)
 Json::Json(const Json &other)
     : doc(other.doc), indexList(other.indexList), counter(other.counter) {}
 
-Json &Json::add(String name, JSType::Element value) {
-    doc.insert(std::make_pair(name, value));
-    indexList.insert(std::make_pair(counter++, name));
+Json &Json::add(const String &name, const JSType::Element &value) {
+    if (!contains(name)) {
+        doc.insert(std::make_pair(name, value));
+        indexList.insert(std::make_pair(counter++, name));
+    } else {
+        getElement(name) = value;
+    }
     return *this;
 }
 
@@ -1470,26 +1587,26 @@ int16_t Json::getIndex(const String &name) const {
 }
 
 String Json::toString() const {
-    String str("{");
+    String result("{");
     bool isFirst = true;
     for (int i = 0; i < doc.size(); i++) {
         if (isFirst) {
             isFirst = false;
         } else {
-            str += ",";
+            result += ",";
         }
-        str += "\"" + getKey(i) + "\":";
-        str += (getElement(i).getType() == JSType::jsonString ? "\"" : "") + getElement(i).as<String>() + (getElement(i).getType() == JSType::jsonString ? "\"" : "");
+        result += "\"" + getKey(i) + "\":";
+        result += (getElement(i).getType() == JSType::jsonString ? "\"" : "") + getElement(i).as<String>() + (getElement(i).getType() == JSType::jsonString ? "\"" : "");
     }
-    str += "}";
-    return str;
+    result += "}";
+    return result;
 }
 
 size_t Json::size() const {
     return doc.size();
 }
 
-bool Json::contains(String name) const {
+bool Json::contains(const String &name) const {
     return doc.count(name) > 0;
 }
 

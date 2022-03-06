@@ -61,10 +61,12 @@ class JSType {
         operator double() const;
         operator bool() const;
         operator String() const;
+        operator char*();
         operator Json &();
         operator JsonArray &();
 
         Element &operator=(const Element &);
+
         Element &operator[](const int8_t &index);
         Element &operator[](const int16_t &index);
         Element &operator[](const int32_t &index);
@@ -86,8 +88,6 @@ class JSType {
         bool operator==(const bool &e) const;
         bool operator==(const char *e) const;
         bool operator==(const String &e) const;
-        bool operator==(const Json &e);
-        bool operator==(const JsonArray &e);
 
         bool operator!=(const Element &e) const;
         bool operator!=(const int8_t &e) const;
@@ -101,8 +101,6 @@ class JSType {
         bool operator!=(const bool &e) const;
         bool operator!=(const char *e) const;
         bool operator!=(const String &e) const;
-        bool operator!=(const Json &e);
-        bool operator!=(const JsonArray &e);
 
         bool operator<(const Element &e) const;
         bool operator<(const int8_t &e) const;
@@ -173,7 +171,14 @@ class JSType {
 
         Type getType() const;
         String getTypeName() const;
-        
+        size_t size() const;
+        size_t lastIndex() const;
+
+        void remove(const size_t &index);
+        void remove(const String &key);
+        void clear();
+
+        bool contains(const JSType::Element &e) const;
         bool isNull() const;
         bool isEmpty() const;
         bool isNotEmpty() const;
@@ -216,7 +221,7 @@ class JsonArray {
     JsonArray(std::vector<int> &arr);
     explicit JsonArray(const char *str);
 
-    JsonArray &push(JSType::Element value);
+    JsonArray &push(const JSType::Element &value);
     JsonArray &push();
 
     JSType::Element &operator[](const uint16_t &index);
@@ -252,7 +257,7 @@ class Json {
     Json(const Json &other);
     explicit Json(const char *str);
 
-    Json &add(String name, JSType::Element value);
+    Json &add(const String &name, const JSType::Element &value);
     Json &add(const String &name);
 
     JSType::Element &operator[](const String &name);
@@ -277,7 +282,7 @@ class Json {
     String toString() const;
 
     size_t size() const;
-    bool contains(String name) const;
+    bool contains(const String &e) const;
     bool isEmpty() const;
     bool isNotEmpty() const;
     void remove(const String &name);
