@@ -164,7 +164,7 @@ JSType::Element::operator String() const {
     }
 }
 
-JSType::Element::operator char *() {
+JSType::Element::operator char *() const {
     switch (type) {
         case jsonObject:
             if (value) {
@@ -193,7 +193,7 @@ JSType::Element::operator char *() {
     }
 }
 
-JSType::Element::operator Json &() {
+JSType::Element::operator Json &() const {
     static Json emptyJson;
     if (!object) {
         if (value && type == jsonObject) {
@@ -208,7 +208,7 @@ JSType::Element::operator Json &() {
     return *object;
 }
 
-JSType::Element::operator JsonArray &() {
+JSType::Element::operator JsonArray &() const {
     static JsonArray emptyJsonArray;
     if (!array) {
         if (value && type == jsonArray) {
@@ -286,6 +286,46 @@ JSType::Element &JSType::Element::operator[](const char *key) {
 }
 
 JSType::Element &JSType::Element::operator[](const String &key) {
+    if (type != jsonObject) {
+        _emptyElement = Element();
+        return _emptyElement;
+    }
+    return as<Json &>()[key];
+}
+
+const JSType::Element &JSType::Element::operator[](const int8_t &index) const {
+    return operator[]((uint32_t)index);
+}
+
+const JSType::Element &JSType::Element::operator[](const int16_t &index) const {
+    return operator[]((uint32_t)index);
+}
+
+const JSType::Element &JSType::Element::operator[](const int32_t &index) const {
+    return operator[]((uint32_t)index);
+}
+
+const JSType::Element &JSType::Element::operator[](const uint8_t &index) const {
+    return operator[]((uint32_t)index);
+}
+
+const JSType::Element &JSType::Element::operator[](const uint16_t &index) const {
+    return operator[]((uint32_t)index);
+}
+
+const JSType::Element &JSType::Element::operator[](const uint32_t &index) const {
+    if (type != jsonArray) {
+        _emptyElement = Element();
+        return _emptyElement;
+    }
+    return as<JsonArray &>()[index];
+}
+
+const JSType::Element &JSType::Element::operator[](const char *key) const {
+    return operator[](String(key));
+}
+
+const JSType::Element &JSType::Element::operator[](const String &key) const {
     if (type != jsonObject) {
         _emptyElement = Element();
         return _emptyElement;
@@ -684,6 +724,624 @@ bool JSType::Element::operator>=(const String &e) const {
     return compareTo(e) >= 0;
 }
 
+JSType::Element JSType::Element::operator+(const Element &e) const {
+    if (value == NULL || e.value == NULL) return *this;
+    switch (type) {
+        case jsonInteger:
+        case jsonFloat: {
+            switch (e.type) {
+                case jsonInteger:
+                case jsonFloat:
+                    return as<double>() + e.as<double>();
+                case jsonString:
+                    return as<String>() + e.as<String>();
+                default:
+                    return *this;
+            }
+        }
+        case jsonString: {
+            switch (e.type) {
+                case jsonInteger:
+                case jsonFloat:
+                case jsonString:
+                    return as<String>() + e.as<String>();
+                case jsonBoolean:
+                    return as<String>() + String(e.as<bool>() ? "true" : "false");
+                default:
+                    return *this;
+            }
+        }
+        case jsonBoolean: {
+            switch (e.type) {
+                case jsonString:
+                    return String(as<bool>() ? "true" : "false") + e.as<String>();
+                default:
+                    return *this;
+            }
+        }
+        default: {
+            return *this;
+        }
+    }
+}
+
+JSType::Element JSType::Element::operator+(const int8_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const int16_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const int32_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const uint8_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const uint16_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const uint32_t &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const float &e) const {
+    return operator+((double)e);
+}
+
+JSType::Element JSType::Element::operator+(const double &e) const {
+    if (type == jsonInteger || type == jsonFloat) {
+        return as<double>() + e;
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator+(const bool &e) const {
+    return operator+(String(e ? "true" : "false"));
+}
+
+JSType::Element JSType::Element::operator+(const char *e) const {
+    return operator+(String(e));
+}
+
+JSType::Element JSType::Element::operator+(const String &e) const {
+    if (type == jsonString) {
+        return as<String>() + e;
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator-(const Element &e) const {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        return as<double>() - e.as<double>();
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator-(const int8_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const int16_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const int32_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const uint8_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const uint16_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const uint32_t &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const float &e) const {
+    return operator-((double)e);
+}
+
+JSType::Element JSType::Element::operator-(const double &e) const {
+    if (type == jsonInteger || type == jsonFloat) {
+        return as<double>() - e;
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator*(const Element &e) const {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        return as<double>() * e.as<double>();
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator*(const int8_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const int16_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const int32_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const uint8_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const uint16_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const uint32_t &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const float &e) const {
+    return operator*((double)e);
+}
+
+JSType::Element JSType::Element::operator*(const double &e) const {
+    if (type == jsonInteger || type == jsonFloat) {
+        return as<double>() * e;
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator/(const Element &e) const {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        return as<double>() / e.as<double>();
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator/(const int8_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const int16_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const int32_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const uint8_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const uint16_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const uint32_t &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const float &e) const {
+    return operator/((double)e);
+}
+
+JSType::Element JSType::Element::operator/(const double &e) const {
+    if (type == jsonInteger || type == jsonFloat) {
+        return as<double>() / e;
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator%(const Element &e) const {
+    if (value == NULL || e.value == NULL) return *this;
+    switch (type) {
+        case jsonInteger:
+            if (e.type == jsonInteger) {
+                return as<int32_t>() % e.as<int32_t>();
+            } else if (e.type == jsonFloat) {
+                return fmod(as<double>(), e.as<double>());
+            }
+        case jsonFloat:
+            if (e.type == jsonInteger || e.type == jsonFloat) {
+                return fmod(as<double>(), e.as<double>());
+            }
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator%(const int8_t &e) const {
+    return operator%((int32_t)e);
+}
+
+JSType::Element JSType::Element::operator%(const int16_t &e) const {
+    return operator%((int32_t)e);
+}
+
+JSType::Element JSType::Element::operator%(const int32_t &e) const {
+    switch (type) {
+        case jsonInteger:
+            return as<int32_t>() % e;
+        case jsonFloat:
+            return fmod(as<double>(), (double)e);
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator%(const uint8_t &e) const {
+    return operator%((uint32_t)e);
+}
+
+JSType::Element JSType::Element::operator%(const uint16_t &e) const {
+    return operator%((uint32_t)e);
+}
+
+JSType::Element JSType::Element::operator%(const uint32_t &e) const {
+    switch (type) {
+        case jsonInteger:
+            return as<int32_t>() % e;
+        case jsonFloat:
+            return fmod(as<double>(), (double)e);
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator%(const float &e) const {
+    return operator%((double)e);
+}
+
+JSType::Element JSType::Element::operator%(const double &e) const {
+    if (type == jsonInteger || type == jsonFloat) {
+        return fmod(as<double>(), e);
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator+=(const Element &e) {
+    if (value == NULL || e.value == NULL) return *this;
+    switch (type) {
+        case jsonInteger:
+        case jsonFloat: {
+            if (e.type == jsonInteger || e.type == jsonFloat) {
+                *value = JSUtil.toString(as<double>() + e.as<double>());
+                if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+                    type = jsonFloat;
+                }
+            }
+            break;
+        }
+        case jsonString: {
+            switch (e.type) {
+                case jsonInteger:
+                case jsonFloat:
+                case jsonString:
+                    *value += *e.value;
+                    break;
+                case jsonBoolean:
+                    *value += e.as<bool>() ? "true" : "false";
+                    break;
+            }
+            break;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator+=(const int8_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const int16_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const int32_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const uint8_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const uint16_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const uint32_t &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const float &e) {
+    return operator+=((double)e);
+}
+
+JSType::Element &JSType::Element::operator+=(const double &e) {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() + e);
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    } else if (type == jsonString) {
+        *value += JSUtil.toString(e);
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator+=(const bool &e) {
+    return operator+=(String(e ? "true" : "false"));
+}
+
+JSType::Element &JSType::Element::operator+=(const char *e) {
+    return operator+=(String(e));
+}
+
+JSType::Element &JSType::Element::operator+=(const String &e) {
+    if (type == jsonString) {
+        *value += e;
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator-=(const Element &e) {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        *value = JSUtil.toString(as<double>() - e.as<double>());
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator-=(const int8_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const int16_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const int32_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const uint8_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const uint16_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const uint32_t &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const float &e) {
+    return operator-=((double)e);
+}
+
+JSType::Element &JSType::Element::operator-=(const double &e) {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() - e);
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator*=(const Element &e) {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        *value = JSUtil.toString(as<double>() * e.as<double>());
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator*=(const int8_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const int16_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const int32_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const uint8_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const uint16_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const uint32_t &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const float &e) {
+    return operator*=((double)e);
+}
+
+JSType::Element &JSType::Element::operator*=(const double &e) {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() * e);
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator/=(const Element &e) {
+    if (value == NULL || e.value == NULL) return *this;
+    if ((type == jsonInteger || type == jsonFloat) && (e.type == jsonInteger || e.type == jsonFloat)) {
+        *value = JSUtil.toString(as<double>() / e.as<double>());
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator/=(const int8_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const int16_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const int32_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const uint8_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const uint16_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const uint32_t &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const float &e) {
+    return operator/=((double)e);
+}
+
+JSType::Element &JSType::Element::operator/=(const double &e) {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() / e);
+        if (type == jsonInteger && fmod(as<double>(), 1) != 0.0) {
+            type = jsonFloat;
+        }
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator%=(const Element &e) {
+    if (value == NULL || e.value == NULL) return *this;
+    switch (type) {
+        case jsonInteger:
+            if (e.type == jsonInteger) {
+                *value = String(as<int32_t>() % e.as<int32_t>());
+            } else if (e.type == jsonFloat) {
+                *value = JSUtil.toString(fmod(as<double>(), e.as<double>()));
+                type = jsonFloat;
+            }
+            break;
+        case jsonFloat:
+            if (e.type == jsonInteger || e.type == jsonFloat) {
+                *value = JSUtil.toString(fmod(as<double>(), e.as<double>()));
+            }
+            break;
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator%=(const int8_t &e) {
+    return operator%=((int32_t)e);
+}
+
+JSType::Element &JSType::Element::operator%=(const int16_t &e) {
+    return operator%=((int32_t)e);
+}
+
+JSType::Element &JSType::Element::operator%=(const int32_t &e) {
+    switch (type) {
+        case jsonInteger:
+            *value = String(as<int32_t>() % e);
+            break;
+        case jsonFloat:
+            *value = JSUtil.toString(fmod(as<double>(), (double)e));
+            break;
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator%=(const uint8_t &e) {
+    return operator%=((uint32_t)e);
+}
+
+JSType::Element &JSType::Element::operator%=(const uint16_t &e) {
+    return operator%=((uint32_t)e);
+}
+
+JSType::Element &JSType::Element::operator%=(const uint32_t &e) {
+    switch (type) {
+        case jsonInteger:
+            *value = String(as<int32_t>() % e);
+            break;
+        case jsonFloat:
+            *value = JSUtil.toString(fmod(as<double>(), (double)e));
+            break;
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator%=(const float &e) {
+    return operator%=((double)e);
+}
+
+JSType::Element &JSType::Element::operator%=(const double &e) {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(fmod(as<double>(), e));
+        type = jsonFloat;
+    }
+    return *this;
+}
+
+JSType::Element &JSType::Element::operator++() {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() + 1);
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator++(int) {
+    Element e = *this;
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() + 1);
+    }
+    return e;
+}
+
+JSType::Element &JSType::Element::operator--() {
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() - 1);
+    }
+    return *this;
+}
+
+JSType::Element JSType::Element::operator--(int) {
+    Element e = *this;
+    if (type == jsonInteger || type == jsonFloat) {
+        *value = JSUtil.toString(as<double>() - 1);
+    }
+    return e;
+}
+
 int32_t JSType::Element::toInt() const {
     return *this;
 }
@@ -708,12 +1366,16 @@ String JSType::Element::toString() const {
     return *this;
 }
 
-Json &JSType::Element::toJson() {
+Json &JSType::Element::toJson() const {
     return *this;
 }
 
-JsonArray &JSType::Element::toArray() {
+JsonArray &JSType::Element::toArray() const {
     return *this;
+}
+
+char *JSType::Element::c_str() const {
+    return (char *)*this;
 }
 
 JSType::Type JSType::Element::getType() const {
@@ -758,9 +1420,13 @@ size_t JSType::Element::lastIndex() const {
     return len == 0 ? 0 : len - 1;
 }
 
-void JSType::Element::remove(const size_t &index) {
-    if (type == jsonArray) {
-        as<JsonArray &>().remove(index);
+void JSType::Element::remove(const size_t &index, const size_t &count) {
+    if (type == jsonString) {
+        if (value) {
+            value->remove(index, count);
+        }
+    } else if (type == jsonArray) {
+        as<JsonArray &>().remove(index, count);
     }
 }
 
@@ -1277,11 +1943,11 @@ String JsonUtil::removeInsignificantZeros(const String &str) {
 }
 
 String JsonUtil::toString(const float &value) {
-    return removeInsignificantZeros(String(value, 7));
+    return removeInsignificantZeros(String(value, 5));
 }
 
 String JsonUtil::toString(const double &value) {
-    return removeInsignificantZeros(String(value, 15));
+    return removeInsignificantZeros(String(value, 11));
 }
 
 void JsonUtil::remove(String &str, const int &len, const bool &fromEnd) {
@@ -1410,12 +2076,12 @@ size_t JsonArray::size() const {
 }
 
 size_t JsonArray::lastIndex() const {
-    return v.size() - 1;
+    return v.size() == 0 ? 0 : v.size() - 1;
 }
 
-void JsonArray::remove(const uint16_t &index) {
+void JsonArray::remove(const size_t &index, const size_t &count) {
     if (index < v.size()) {
-        v.erase(v.begin() + index);
+        v.erase(v.begin() + index, v.begin() + index + count);
     }
 }
 
@@ -1574,7 +2240,7 @@ String Json::getKey(const uint16_t &index) const {
     return indexList.at(index);
 }
 
-int16_t Json::getIndex(const String &name) const {
+int16_t Json::indexOf(const String &name) const {
     if (!contains(name)) {
         return -1;
     }
@@ -1620,7 +2286,7 @@ bool Json::isNotEmpty() const {
 
 void Json::remove(const String &name) {
     if (contains(name)) {
-        int i = getIndex(name);
+        int i = indexOf(name);
         if (i >= 0) {
             doc.erase(name);
             indexList.erase(i);

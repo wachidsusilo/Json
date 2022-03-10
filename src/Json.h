@@ -24,10 +24,10 @@ class JSType {
 
     struct Element {
        private:
-        String *value;
         Type type;
-        Json *object;
-        JsonArray *array;
+        mutable String *value;
+        mutable Json *object;
+        mutable JsonArray *array;
         void release();
         int compareTo(const Element &e) const;
 
@@ -61,9 +61,9 @@ class JSType {
         operator double() const;
         operator bool() const;
         operator String() const;
-        operator char*();
-        operator Json &();
-        operator JsonArray &();
+        explicit operator char*() const;
+        operator Json &() const;
+        operator JsonArray &() const;
 
         Element &operator=(const Element &);
 
@@ -75,6 +75,15 @@ class JSType {
         Element &operator[](const uint32_t &index);
         Element &operator[](const String &key);
         Element &operator[](const char *key);
+
+        const Element &operator[](const int8_t &index) const;
+        const Element &operator[](const int16_t &index) const;
+        const Element &operator[](const int32_t &index) const;
+        const Element &operator[](const uint8_t &index) const;
+        const Element &operator[](const uint16_t &index) const;
+        const Element &operator[](const uint32_t &index) const;
+        const Element &operator[](const String &key) const;
+        const Element &operator[](const char *key) const;
 
         bool operator==(const Element &e) const;
         bool operator==(const int8_t &e) const;
@@ -154,14 +163,126 @@ class JSType {
         bool operator>=(const char *e) const;
         bool operator>=(const String &e) const;
 
+        Element operator+(const Element &e) const;
+        Element operator+(const int8_t &e) const;
+        Element operator+(const int16_t &e) const;
+        Element operator+(const int32_t &e) const;
+        Element operator+(const uint8_t &e) const;
+        Element operator+(const uint16_t &e) const;
+        Element operator+(const uint32_t &e) const;
+        Element operator+(const float &e) const;
+        Element operator+(const double &e) const;
+        Element operator+(const bool &e) const;
+        Element operator+(const char *e) const;
+        Element operator+(const String &e) const;
+
+        Element operator-(const Element &e) const;
+        Element operator-(const int8_t &e) const;
+        Element operator-(const int16_t &e) const;
+        Element operator-(const int32_t &e) const;
+        Element operator-(const uint8_t &e) const;
+        Element operator-(const uint16_t &e) const;
+        Element operator-(const uint32_t &e) const;
+        Element operator-(const float &e) const;
+        Element operator-(const double &e) const;
+
+        Element operator*(const Element &e) const;
+        Element operator*(const int8_t &e) const;
+        Element operator*(const int16_t &e) const;
+        Element operator*(const int32_t &e) const;
+        Element operator*(const uint8_t &e) const;
+        Element operator*(const uint16_t &e) const;
+        Element operator*(const uint32_t &e) const;
+        Element operator*(const float &e) const;
+        Element operator*(const double &e) const;
+
+        Element operator/(const Element &e) const;
+        Element operator/(const int8_t &e) const;
+        Element operator/(const int16_t &e) const;
+        Element operator/(const int32_t &e) const;
+        Element operator/(const uint8_t &e) const;
+        Element operator/(const uint16_t &e) const;
+        Element operator/(const uint32_t &e) const;
+        Element operator/(const float &e) const;
+        Element operator/(const double &e) const;
+
+        Element operator%(const Element &e) const;
+        Element operator%(const int8_t &e) const;
+        Element operator%(const int16_t &e) const;
+        Element operator%(const int32_t &e) const;
+        Element operator%(const uint8_t &e) const;
+        Element operator%(const uint16_t &e) const;
+        Element operator%(const uint32_t &e) const;
+        Element operator%(const float &e) const;
+        Element operator%(const double &e) const;
+
+        Element &operator+=(const Element &e);
+        Element &operator+=(const int8_t &e);
+        Element &operator+=(const int16_t &e);
+        Element &operator+=(const int32_t &e);
+        Element &operator+=(const uint8_t &e);
+        Element &operator+=(const uint16_t &e);
+        Element &operator+=(const uint32_t &e);
+        Element &operator+=(const float &e);
+        Element &operator+=(const double &e);
+        Element &operator+=(const bool &e);
+        Element &operator+=(const char *e);
+        Element &operator+=(const String &e);
+
+        Element &operator-=(const Element &e);
+        Element &operator-=(const int8_t &e);
+        Element &operator-=(const int16_t &e);
+        Element &operator-=(const int32_t &e);
+        Element &operator-=(const uint8_t &e);
+        Element &operator-=(const uint16_t &e);
+        Element &operator-=(const uint32_t &e);
+        Element &operator-=(const float &e);
+        Element &operator-=(const double &e);
+
+        Element &operator*=(const Element &e);
+        Element &operator*=(const int8_t &e);
+        Element &operator*=(const int16_t &e);
+        Element &operator*=(const int32_t &e);
+        Element &operator*=(const uint8_t &e);
+        Element &operator*=(const uint16_t &e);
+        Element &operator*=(const uint32_t &e);
+        Element &operator*=(const float &e);
+        Element &operator*=(const double &e);
+
+        Element &operator/=(const Element &e);
+        Element &operator/=(const int8_t &e);
+        Element &operator/=(const int16_t &e);
+        Element &operator/=(const int32_t &e);
+        Element &operator/=(const uint8_t &e);
+        Element &operator/=(const uint16_t &e);
+        Element &operator/=(const uint32_t &e);
+        Element &operator/=(const float &e);
+        Element &operator/=(const double &e);
+
+        Element &operator%=(const Element &e);
+        Element &operator%=(const int8_t &e);
+        Element &operator%=(const int16_t &e);
+        Element &operator%=(const int32_t &e);
+        Element &operator%=(const uint8_t &e);
+        Element &operator%=(const uint16_t &e);
+        Element &operator%=(const uint32_t &e);
+        Element &operator%=(const float &e);
+        Element &operator%=(const double &e);
+
+        Element &operator++();
+        Element operator++(int);
+        Element &operator--();
+        Element operator--(int);
+
         int32_t toInt() const;
         uint32_t toUInt() const;
         float toFloat() const;
         double toDouble() const;
         bool toBool() const;
         String toString() const;
-        Json &toJson();
-        JsonArray &toArray();
+        Json &toJson() const;
+        JsonArray &toArray() const;
+        char* c_str() const;
 
         template <typename T>
         T as() { return *this; }
@@ -174,7 +295,7 @@ class JSType {
         size_t size() const;
         size_t lastIndex() const;
 
-        void remove(const size_t &index);
+        void remove(const size_t &index, const size_t &count = 1);
         void remove(const String &key);
         void clear();
 
@@ -235,14 +356,16 @@ class JsonArray {
     JSType::Type getType(const uint16_t &index) const;
     String getTypeName(const uint16_t &index) const;
     String toString() const;
-
     size_t size() const;
     size_t lastIndex() const;
+
     bool contains(const JSType::Element &e) const;
     bool isEmpty() const;
     bool isNotEmpty() const;
-    void remove(const uint16_t &index);
+
+    void remove(const size_t &index, const size_t &count = 1);
     void clear();
+
     std::vector<JSType::Element>::iterator begin();
     std::vector<JSType::Element>::iterator end();
 
@@ -278,15 +401,17 @@ class Json {
     String getTypeName(const uint16_t &index) const;
     String getKey(const uint16_t &index) const;
 
-    int16_t getIndex(const String &name) const;
+    int16_t indexOf(const String &name) const;
     String toString() const;
-
     size_t size() const;
+
     bool contains(const String &e) const;
     bool isEmpty() const;
     bool isNotEmpty() const;
+    
     void remove(const String &name);
     void clear();
+
     std::map<String, JSType::Element>::iterator begin();
     std::map<String, JSType::Element>::iterator end();
 
