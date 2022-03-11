@@ -7,7 +7,7 @@ void printValue(String name, String value, String type) {
 
 void setup() {
     Serial.begin(115200);
-    JSUtil.attachDebugger(Serial);
+    JSUtil::attachDebugger(Serial);
     delay(1000);
 
     Serial.println("******** Json Example *********\n");
@@ -33,7 +33,7 @@ void setup() {
      including: jsonString, jsonInteger, jsonFloat,
      jsonBoolean, jsonNull, jsonArray, and jsonObject
   */
-    JSType::Type t = json.getType("name");
+    Element::Type t = json.getType("name");
 
     /*Get type of specified name (String)*/
     /**
@@ -58,7 +58,7 @@ void setup() {
 
     /*Stringify Json Object with indentation*/
     Serial.println("\n*** Pretty String ***");
-    JSUtil.prettyPrint(Serial, json);
+    JSUtil::prettyPrint(Serial, json);
 
     Serial.println("\n++++ Generating Json Object +++++\n");
 
@@ -207,18 +207,18 @@ void setup() {
     /*Get Array*/
     JsonArray arr = js.getElement("my-array");
     printValue("my-array", "", js.getTypeName("my-array"));
-    JSUtil.prettyPrint(Serial, arr);
+    JSUtil::prettyPrint(Serial, arr);
 
     /*Get Json Object*/
     Json obj = js["color"];
     printValue("color", "", js.getTypeName("color"));
-    JSUtil.prettyPrint(Serial, obj);
+    JSUtil::prettyPrint(Serial, obj);
 
     /*Set the value of a nested object*/
     js["color"].as<Json&>()["red"] = 255;
     obj = js["color"];
     printValue("color", "", js.getTypeName("color"));
-    JSUtil.prettyPrint(Serial, obj);
+    JSUtil::prettyPrint(Serial, obj);
 
     Serial.println("\n++++ Get value from a Json Array +++++\n");
 
@@ -255,17 +255,17 @@ void setup() {
     /*Get Array*/
     JsonArray m_arr = jsonArray[5];
     printValue("5", "", jsonArray.getTypeName(5));
-    JSUtil.prettyPrint(Serial, m_arr);
+    JSUtil::prettyPrint(Serial, m_arr);
 
     /*Get Json Object*/
     Json m_json = jsonArray.getElement(6);
     printValue("6", "", jsonArray.getTypeName(6));
-    JSUtil.prettyPrint(Serial, m_json);
+    JSUtil::prettyPrint(Serial, m_json);
 
     std::vector<int> data;
     for (int i = 0; i < 10; i++) data.emplace_back(i);
     JsonArray jsArray(data);
-    JSUtil.prettyPrint(Serial, jsArray);
+    JSUtil::prettyPrint(Serial, jsArray);
 }
 
 void loop() {
@@ -276,7 +276,7 @@ void loop() {
         } else {
             /*Get Json Array from PROGMEM*/
             JsonArray js(data);
-            JSUtil.prettyPrint(Serial, js);
+            JSUtil::prettyPrint(Serial, js);
         }
     }
 }
